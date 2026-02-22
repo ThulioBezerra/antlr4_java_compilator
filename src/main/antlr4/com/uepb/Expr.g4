@@ -1,11 +1,12 @@
-// Exemplo retirado de https://www.antlr.org/
 grammar Expr;
 
-prog:   (expr NEWLINE?)* ;
-expr:   expr ('*'|'/') expr
-    |   expr ('+'|'-') expr
-    |   INT
-    |   '(' expr ')'
+calc: expr EOF;
+expr: '(' NESTED_EXPR=expr ')'                      # Parenteses
+    | <assoc=right> BASE=expr OP='^' EXPOENTE=expr  # Exponenciacao
+    | OPERANDO1=expr OP=('*'|'/') OPERANDO2=expr    # MulDiv
+    | OPERANDO1=expr OP=('+'|'-') OPERANDO2=expr    # SomaSub
+    | NUMBER                                        # Numero
     ;
-NEWLINE : [\r\n]+ ;
-INT     : [0-9]+ ;
+
+NEWLINE : [ \t\r\n]+ -> skip;
+NUMBER     : [0-9]+('.'[0-9]+)?;

@@ -19,7 +19,13 @@ public class Antlr4BasicExample implements CompilerEngine{
         var lexer = new ExprLexer(charStream);
         var tokens = new CommonTokenStream(lexer);
         var parser = new ExprParser(tokens);
-        var tree = parser.prog();
+        var tree = parser.calc();
+
+        if(parser.getNumberOfSyntaxErrors() == 0){
+            var visitor = new ExprVisitor();
+            var resultado = visitor.visit(tree);
+            System.out.println("Resultado: " + resultado);
+        }
 
         if(verbose){
             var guiTask = new GuiVizualizerTask(parser, tree);
