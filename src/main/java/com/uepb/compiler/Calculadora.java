@@ -1,15 +1,20 @@
 package com.uepb.compiler;
 
 import com.uepb.ExprBaseVisitor;
+import com.uepb.ExprParser.DeclVariavelContext;
+import com.uepb.ExprParser.DeclaracaoContext;
 import com.uepb.ExprParser.ExponenciacaoContext;
 import com.uepb.ExprParser.MulDivContext;
 import com.uepb.ExprParser.NumeroContext;
 import com.uepb.ExprParser.ParentesesContext;
 import com.uepb.ExprParser.ProgContext;
 import com.uepb.ExprParser.SomaSubContext;
+import com.uepb.ExprParser.UsoVariavelContext;
 
 public class Calculadora extends ExprBaseVisitor<Double>{
     
+    private final ScopeControl scopes = new ScopeControl();
+
     @Override
     public Double visitProg(ProgContext ctx) {
         return visit(ctx.expr());
@@ -54,7 +59,65 @@ public class Calculadora extends ExprBaseVisitor<Double>{
     @Override
     public Double visitNumero(NumeroContext ctx) {
         var numeroStr = ctx.NUMBER().getText();
+        var sinal = ctx.SINAL;
+
+        if(sinal != null && sinal.getText().equals("-")){
+            return Double.valueOf(numeroStr) * (-1);
+        }
+
         return Double.valueOf(numeroStr);
+    }
+
+    @Override
+    public Double visitUsoVariavel(UsoVariavelContext ctx) {
+        var nomeVar = ctx.ID().getText();
+        var tk = ctx.ID().getSymbol();
+        var sinal = ctx.SINAL;
+        var declaracaoOpt = scopes.lookup(nomeVar);
+
+        if(declaracaoOpt.isEmpty()){
+            throw new RuntimeException(
+                "A variavel '%s' não foi declarada na linha %d e coluna %d."
+                .formatted(nomeVar,tk.getLine(),tk.getCharPositionInLine())
+            );
+        }
+
+        var valor = declaracaoOpt.get().value();
+
+        if(sinal != null && sinal.getText().equals("-")){
+            return -valor;
+        }
+
+        return valor;
+    }
+
+    @Override
+    public Double visitDeclVariavel(DeclVariavelContext ctx) {
+        scopes.createScope();
+        visit(ctx.listaDeclaracao());
+        var valor = visit(ctx.expr());
+        scopes.dropScope();
+
+        return valor;
+    }
+
+    @Override
+    public Double visitDeclaracao(DeclaracaoContext ctx) {
+        var varName = ctx.ID().getText();
+        var tk = ctx.ID().getSymbol();
+        var currentScope = scopes.getCurrentScope();
+
+        if(currentScope.exists(varName)){
+            throw new RuntimeException(
+                "A variavel '%s' presente na linha %d e coluna %d ja foi declarada."
+                .formatted(varName,tk.getLine(),tk.getCharPositionInLine())
+            );
+        }
+
+        var valor = visit(ctx.expr());
+        currentScope.insert(varName, valor);
+
+        return null;
     }
 
 }

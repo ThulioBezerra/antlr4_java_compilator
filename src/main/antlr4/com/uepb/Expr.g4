@@ -6,7 +6,7 @@ expr: '(' NESTED_EXPR=expr ')'                          #Parenteses
     | O1=expr OP=('*'|'/') O2=expr                      #MulDiv
     | O1=expr OP=('+'|'-') O2=expr                      #SomaSub
     | SINAL=('+'|'-')? NUMBER                           #Numero
-    | SINAL=('+'|'-')? ID                                #UsoVariavel
+    | SINAL=('+'|'-')? ID                               #UsoVariavel
     | 'let' listaDeclaracao '->' expr                   #DeclVariavel
 ;
 
