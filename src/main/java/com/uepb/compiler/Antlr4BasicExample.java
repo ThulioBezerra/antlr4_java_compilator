@@ -2,6 +2,7 @@ package com.uepb.compiler;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -21,10 +22,16 @@ public class Antlr4BasicExample implements CompilerEngine{
         var parser = new ExprParser(tokens);
         var tree = parser.calc();
 
-        if(parser.getNumberOfSyntaxErrors() == 0){
+        if (parser.getNumberOfSyntaxErrors() == 0) {
             var visitor = new ExprVisitor();
-            var resultado = visitor.visit(tree);
-            System.out.println("Resultado: " + resultado);
+            visitor.visit(tree);
+
+            String pCodeGerado = visitor.getResult();
+            Files.writeString(output.toPath(), pCodeGerado);
+
+            System.out.println("Arquivo P-Code gerado com sucesso em: " + output.getAbsolutePath());
+        } else {
+            System.err.println("Erro de compilação: O código possui erros sintáticos.");
         }
 
         if(verbose){

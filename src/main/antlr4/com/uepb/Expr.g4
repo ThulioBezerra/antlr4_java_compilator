@@ -2,13 +2,16 @@ grammar Expr;
 
 calc: expr EOF;
 
-expr: '(' NESTED_EXPR=expr ')'                      # Parenteses
-    | <assoc=right> BASE=expr OP='^' EXPOENTE=expr  # Exponenciacao
-    | OPERANDO1=expr OP=('*'|'/') OPERANDO2=expr    # MulDiv
-    | OPERANDO1=expr OP=('+'|'-') OPERANDO2=expr    # SomaSub
-    | SINAL=('+'|'-')? NUMBER                       # Numero
-    | SINAL=('+'|'-')? ID                           # UsoVariavel
-    | 'let' listaDeclaracoes '->' expr              # DeclaracaoVariavel
+expr: '(' expr ')'                                              # Parenteses
+    | OP=('-'|'+') expr                                         # Unario
+    | OPERANDO1=expr OP=('*'|'/') OPERANDO2=expr                # MulDiv
+    | OPERANDO1=expr OP=('+'|'-') OPERANDO2=expr                # SomaSub
+    | NUMBER                                                    # Numero
+    | ID                                                        # UsoVariavel
+    | 'let' listaDeclaracoes '->' expr                          # DeclaracaoVariavel
+    | <assoc=right> ID '=' expr                                 # AtribVariavel
+    | 'loop' '{' LOOP_EVAL=expr '}' EXP=expr  '->' OUT=expr     # Loop
+    | 'ask'                                                     # Input
     ;
 
 listaDeclaracoes: declaracao (',' declaracao)*;

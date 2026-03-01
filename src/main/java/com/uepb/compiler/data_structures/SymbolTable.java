@@ -10,8 +10,8 @@ public class SymbolTable {
         table = new HashMap<>();
     }
 
-    public void insertVariable(String name, Double value){
-        table.put(name, new Variable(name, value));
+    public void insertVariable(String name, Integer address){
+        table.put(name, new Variable(name, address));
     }
 
     public boolean exists(String name){
