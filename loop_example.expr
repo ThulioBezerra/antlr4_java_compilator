@@ -1,0 +1,8 @@
+let x = ask, y = ask, r = 0 -> 
+(
+    loop { x } (
+        loop { y } (
+            r = r + 1
+        ) -> y
+    ) -> r
+)

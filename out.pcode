@@ -2,10 +2,10 @@ push $0
 in
 sto
 push $1
-push 1
+in
 sto
 push $2
-push 1
+push 0
 sto
 push $3
 push $0
@@ -17,15 +17,16 @@ lod
 push 0
 grt
 fjp L1
-push $1
+push $4
 push $1
 lod
-push $2
-lod
-mul
 sto
-push $1
+L2:
+push $4
 lod
+push 0
+grt
+fjp L3
 push $2
 push $2
 lod
@@ -34,7 +35,18 @@ add
 sto
 push $2
 lod
-add
+pop
+push $4
+dup
+lod
+push 1
+sub
+sto
+ujp L2
+L3:
+push 0
+push $1
+lod
 pop
 push $3
 dup
@@ -45,7 +57,7 @@ sto
 ujp L0
 L1:
 push 0
-push $1
+push $2
 lod
 out
 hlt
