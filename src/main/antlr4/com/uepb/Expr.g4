@@ -8,7 +8,8 @@ expr: '(' NESTED_EXPR=expr ')'                          #Parenteses
     | SINAL=('+'|'-')? ID                               #UsoVariavel
     | 'let' listaDeclaracao '->' expr                   #DeclVariavel
     | 'loop' N=expr '{' CODE=expr '}' '->' OUT=expr     #Loop
-    | declaracao                                        #Atribuicao
+    | ID '=' expr                                       #Atribuicao
+    | 'ask'                                             #Input
 ;
 
 listaDeclaracao: declaracao (',' declaracao)*;

@@ -1,0 +1,25 @@
+push $0
+push 5
+sto
+push $1
+push 0
+sto
+L0:
+push $1
+lod
+push $0
+lod
+let
+fjp L1
+push 5
+push 1
+add
+push $1
+push $1
+lod
+push 1
+add
+sto
+ujp L0
+L1:
+hlt
