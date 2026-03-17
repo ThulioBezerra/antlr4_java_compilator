@@ -1,21 +1,88 @@
 grammar Expr;
 
-prog: expr EOF;
-expr: '(' NESTED_EXPR=expr ')'                          #Parenteses
-    | O1=expr OP=('*'|'/') O2=expr                      #MulDiv
-    | O1=expr OP=('+'|'-') O2=expr                      #SomaSub
-    | SINAL=('+'|'-')? NUMBER                           #Numero
-    | SINAL=('+'|'-')? ID                               #UsoVariavel
-    | 'let' listaDeclaracao '->' expr                   #DeclVariavel
-    | 'loop' N=expr '{' CODE=expr '}' '->' OUT=expr     #Loop
-    | ID '=' expr                                        #Atribuicao
-    | 'ask'                                             #Input
-;
+prog : expr* EOF ;
 
-listaDeclaracao: declaracao (',' declaracao)*;
+expr
+    : listaDeclaracao ';'
+    | assignment ';'
+    | ifExpr
+    | whileExpr
+    | printExpr ';'
+    | inputExpr ';'
+    | block
+    ;
 
-declaracao: ID '=' expr;
+listDeclaration
+    : declaration (',' declaration)*                           #DeclVariavel
 
-NUMBER: [0-9]+('.'[0-9]+)?;
-ID: [_a-zA-Z][_a-zA-Z0-9]*;
-WS: [ \r\n\t] -> skip;
+
+declaration
+    : (VAR | LET | CONST) ID ('=' expression)?                 #Declaracao
+    ;
+
+assignment
+    : ID '=' expression                                        #Atribuicao
+    ;
+
+ifExpr
+    : IF LPAREN condition RPAREN block                         #Condicao
+    ;
+
+whileExpr
+    : WHILE LPAREN condition RPAREN block                      #Loop
+    ;
+
+block
+    : LBRACE expr* RBRACE                                      #Bloco
+    ;
+
+printExpr
+    : PRINT LPAREN expression RPAREN                           #Impressao
+    ;
+
+inputExpr
+    : INPUT LPAREN ID RPAREN                                   #Input
+    ;
+
+expression
+    : LPAREN expression RPAREN                                  #Parenteses
+    | expression OP=('^') expression                            #Potencia
+    | expression OP=('*' | '/') expression                      #MulDiv
+    | expression OP=('+' | '-') expression                      #SomaSub 
+    | ID                                                        #UsoVariavel
+    | SIGN=('+'|'-') INT                                        #Numero
+    ;
+
+condition
+    : LPAREN condition RPAREN                   
+    | expression comparisonOperator expression  
+    | (TRUE | FALSE)                                                                   
+    | condition AND condition      
+    | condition OR condition       
+    ;
+
+comparisonOperator
+    : ('>' | '>=' | '<' | '<=' | '==' | '!=')
+    ;
+
+VAR     : 'var' ;
+LET     : 'let' ;
+CONST   : 'const' ;
+IF      : 'if' ;
+WHILE   : 'while' ;
+PRINT   : 'print' ;
+INPUT   : 'input' ;
+AND     : 'and' ;
+OR      : 'or' ;
+TRUE    : 'true' ;
+FALSE   : 'false' ;
+
+LPAREN  : '(' ;
+RPAREN  : ')' ;
+LBRACE  : '{' ;
+RBRACE  : '}' ;
+
+ID      : [a-zA-Z_][a-zA-Z0-9_]* ;
+INT  : [0-9]+ ('.' [0-9]+)? ;
+WS      : [ \t\r\n]+ -> skip ;
+COMMENT : '//' ~[\r\n]* -> skip ;

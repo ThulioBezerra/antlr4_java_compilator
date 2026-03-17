@@ -30,17 +30,18 @@ public class Calculadora extends ExprBaseVisitor<Void>{
         return code.toString();
     }
 
-    @Override
-    public Void visitProg(ProgContext ctx) {
-        visit(ctx.expr());
-        code.append("out\n");
-        code.append("hlt\n"); //EOF
-        return null;
+   public Void visitProg(ProgContext ctx) {
+    for (var expressao : ctx.expr()) {
+        visit(expressao);
     }
+    code.append("out\n");
+    code.append("hlt\n"); 
+    return null;
+}
 
     @Override
     public Void visitParenteses(ParentesesContext ctx) {
-        visit(ctx.NESTED_EXPR);
+        visit(ctx.expression());
         return null;
     }
 
@@ -48,7 +49,8 @@ public class Calculadora extends ExprBaseVisitor<Void>{
     public Void visitMulDiv(MulDivContext ctx) {
         visit(ctx.O1);
         visit(ctx.O2);
-        var operador = ctx.OP.getText();
+
+        String operador = ctx.OP.getText();
 
         if(operador.equals("/")){
             code.append("div\n");
