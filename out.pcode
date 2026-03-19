@@ -1,58 +1,63 @@
 push $0
-push 0
-sto
-push $1
 push 5
 sto
-push $2
-push 0
+push $1
+push 10
 sto
-L0:
-push $2
+push $1
+lod
+push $0
 lod
 push $1
 lod
-let
-fjp L1
-push $3
-push 3
-sto
-push $4
-push 0
-sto
-L2:
-push $4
-lod
-push $3
-lod
-let
-fjp L3
-push $0
+les
 push $0
 lod
+push 5
+equ
+and
 push 1
-add
-sto
-push $0
-lod
-push $4
-push $4
-lod
-push 1
-add
-sto
-ujp L2
-L3:
-push 0
-push $2
-push $2
-lod
-push 1
-add
-sto
-ujp L0
+or
+fjp L0
+prts "x é menor que y e x é igual a 5 ou verdadeiro"
+L0:
 L1:
 push $0
 lod
+push 10
+les
+fjp L2
+prts "O valor de x é:"
+push $0
+lod
+prt
+push $0
+push $0
+lod
+push 1
+add
+sto
+push $0
+lod
+ujp L1
+L2:
+push $2
+push $0
+lod
+push $1
+lod
+push 12
+push 3
+push 4
+exp
+exp
+mul
+add
+sto
+push $2
+lod
+in
+push $3
+sto
 out
 hlt
