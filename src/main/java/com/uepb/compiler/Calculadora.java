@@ -58,8 +58,8 @@ public class Calculadora extends ExprBaseVisitor<Void> {
 
     @Override
     public Void visitPotencia(PotenciaContext ctx) {
-        visit(ctx.expression(0)); // Base
-        visit(ctx.expression(1)); // Expoente
+        visit(ctx.expression(0)); 
+        visit(ctx.expression(1)); 
         code.append("exp\n");
         return null;
     }
@@ -193,9 +193,9 @@ public class Calculadora extends ExprBaseVisitor<Void> {
 
         var address = declaracaoOpt.get().address();
 
-        code.append("in\n"); // Comando P-Code para ler entrada
+        code.append("in\n"); 
         code.append("push $").append(address).append("\n");
-        code.append("sto\n"); // Armazena na variável
+        code.append("sto\n"); 
 
         return null;
     }
@@ -213,7 +213,6 @@ public class Calculadora extends ExprBaseVisitor<Void> {
 
     @Override
     public Void visitBloco(BlocoContext ctx) {
-        // O bloco '{}' cria um novo escopo local para variáveis
         scopes.createScope();
         for (var expressao : ctx.expr()) {
             visit(expressao);
@@ -221,10 +220,6 @@ public class Calculadora extends ExprBaseVisitor<Void> {
         scopes.dropScope();
         return null;
     }
-
-    // ==========================================================
-    // ESTRUTURAS DE CONTROLE (IF e WHILE)
-    // ==========================================================
 
     @Override
     public Void visitCondicao(CondicaoContext ctx) {
@@ -255,10 +250,6 @@ public class Calculadora extends ExprBaseVisitor<Void> {
 
         return null;
     }
-
-    // ==========================================================
-    // CONDIÇÕES LÓGICAS E RELACIONAIS
-    // ==========================================================
 
     @Override
     public Void visitCondRelacional(CondRelacionalContext ctx) {
