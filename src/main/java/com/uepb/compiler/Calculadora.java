@@ -58,9 +58,55 @@ public class Calculadora extends ExprBaseVisitor<Void> {
 
     @Override
     public Void visitPotencia(PotenciaContext ctx) {
-        visit(ctx.expression(0)); 
-        visit(ctx.expression(1)); 
-        code.append("exp\n");
+        var baseAddr = mapper.alloc();
+        var expAddr = mapper.alloc();
+        var resAddr = mapper.alloc();
+
+        var startLoop = createLabel();
+        var endLoop = createLabel();
+
+        code.append("push $").append(baseAddr).append("\n");
+        visit(ctx.expression(0));
+        code.append("sto\n");
+
+        code.append("push $").append(expAddr).append("\n");
+        visit(ctx.expression(1));
+        code.append("sto\n");
+
+        code.append("push $").append(resAddr).append("\n");
+        code.append("push 1\n");
+        code.append("sto\n");
+
+        code.append(startLoop).append(":\n");
+
+        code.append("push $").append(expAddr).append("\n");
+        code.append("lod\n");
+        code.append("push 0\n");
+        code.append("grt\n");
+        code.append("fjp ").append(endLoop).append("\n");
+
+        code.append("push $").append(resAddr).append("\n");
+        code.append("push $").append(resAddr).append("\n");
+        code.append("lod\n");
+        code.append("push $").append(baseAddr).append("\n");
+        code.append("lod\n");
+        code.append("mul\n");
+        code.append("sto\n");
+
+        code.append("push $").append(expAddr).append("\n");
+        code.append("push $").append(expAddr).append("\n");
+        code.append("lod\n");
+        code.append("push 1\n");
+        code.append("sub\n");
+        code.append("sto\n");
+
+        code.append("ujp ").append(startLoop).append("\n");
+
+        code.append(endLoop).append(":\n");
+
+        code.append("push $").append(resAddr).append("\n");
+        code.append("lod\n");
+
         return null;
     }
 
@@ -182,20 +228,16 @@ public class Calculadora extends ExprBaseVisitor<Void> {
     @Override
     public Void visitInput(InputContext ctx) {
         var nomeVar = ctx.ID().getText();
-        var tk = ctx.ID().getSymbol();
         var declaracaoOpt = scopes.lookup(nomeVar);
 
         if (declaracaoOpt.isEmpty()) {
-            throw new RuntimeException(
-                    "A variavel '%s' não foi declarada na linha %d e coluna %d."
-                            .formatted(nomeVar, tk.getLine(), tk.getCharPositionInLine()));
         }
 
         var address = declaracaoOpt.get().address();
 
-        code.append("in\n"); 
         code.append("push $").append(address).append("\n");
-        code.append("sto\n"); 
+        code.append("in\n");
+        code.append("sto\n");
 
         return null;
     }
@@ -203,11 +245,16 @@ public class Calculadora extends ExprBaseVisitor<Void> {
     @Override
     public Void visitImpressao(ImpressaoContext ctx) {
         if (ctx.STRING() != null) {
-            code.append("prts ").append(ctx.STRING().getText()).append("\n");
+            code.append("push ").append(ctx.STRING().getText()).append("\n");
+            code.append("out\n");
         } else {
             visit(ctx.expression());
-            code.append("prt\n");
+            code.append("out\n");
         }
+
+        code.append("push \"\\n\"\n");
+        code.append("out\n");
+
         return null;
     }
 
@@ -260,9 +307,9 @@ public class Calculadora extends ExprBaseVisitor<Void> {
 
         switch (tipoOperador) {
             case ExprParser.GT -> code.append("grt\n");
-            case ExprParser.GE -> code.append("geq\n");
-            case ExprParser.LT -> code.append("les\n");
-            case ExprParser.LE -> code.append("leq\n");
+            case ExprParser.GE -> code.append("gte\n");
+            case ExprParser.LT -> code.append("let\n");
+            case ExprParser.LE -> code.append("lte\n");
             case ExprParser.EQ -> code.append("equ\n");
             case ExprParser.NEQ -> code.append("neq\n");
         }
@@ -288,9 +335,9 @@ public class Calculadora extends ExprBaseVisitor<Void> {
     @Override
     public Void visitCondBooleano(CondBooleanoContext ctx) {
         if (ctx.TRUE() != null) {
-            code.append("push 1\n");
+            code.append("push true\n");
         } else {
-            code.append("push 0\n");
+            code.append("push false\n");
         }
         return null;
     }
