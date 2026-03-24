@@ -180,6 +180,7 @@ public class Calculadora extends ExprBaseVisitor<Void> {
     @Override
     public Void visitDeclaracao(DeclaracaoContext ctx) {
         var varName = ctx.ID().getText();
+        boolean isConst = ctx.start.getText().equals("const");
         var tk = ctx.ID().getSymbol();
         var currentScope = scopes.getCurrentScope();
         var address = mapper.alloc();
@@ -190,7 +191,7 @@ public class Calculadora extends ExprBaseVisitor<Void> {
                             .formatted(varName, tk.getLine(), tk.getCharPositionInLine()));
         }
 
-        currentScope.insert(varName, address);
+        currentScope.insert(varName, address, isConst);
 
         if (ctx.expression() != null) {
             code.append("push $").append(address).append("\n");
@@ -213,6 +214,11 @@ public class Calculadora extends ExprBaseVisitor<Void> {
         }
 
         var variavel = declaracaoOpt.get();
+        if (variavel.isConstant()) {
+            throw new RuntimeException(
+                    "Erro Semântico: Tentativa de reatribuir valor à constante '%s' na linha %d e coluna %d."
+                            .formatted(nomeVar, tk.getLine(), tk.getCharPositionInLine()));
+        }
         var address = variavel.address();
 
         code.append("push $").append(address).append("\n");
