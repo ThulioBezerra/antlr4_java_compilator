@@ -1,36 +1,42 @@
 push $0
-push 5
+push 6
 sto
 push $1
 push 10
 sto
-push $1
-lod
 push $0
 lod
 push $1
 lod
-les
+let
 push $0
 lod
 push 5
 equ
 and
-push 1
+push true
 or
 fjp L0
-prts "x é menor que y e x é igual a 5 ou verdadeiro"
+push "x é menor que y e x é igual a 5 ou verdadeiro"
+out
+push "\n"
+out
 L0:
 L1:
 push $0
 lod
 push 10
-les
+let
 fjp L2
-prts "O valor de x é:"
+push "O valor de x é:"
+out
+push "\n"
+out
 push $0
 lod
-prt
+out
+push "\n"
+out
 push $0
 push $0
 lod
@@ -46,18 +52,76 @@ push $0
 lod
 push $1
 lod
+push $3
 push 12
+sto
+push $4
+push $6
 push 3
+sto
+push $7
 push 4
-exp
-exp
+sto
+push $8
+push 1
+sto
+L5:
+push $7
+lod
+push 0
+grt
+fjp L6
+push $8
+push $8
+lod
+push $6
+lod
+mul
+sto
+push $7
+push $7
+lod
+push 1
+sub
+sto
+ujp L5
+L6:
+push $8
+lod
+sto
+push $5
+push 1
+sto
+L3:
+push $4
+lod
+push 0
+grt
+fjp L4
+push $5
+push $5
+lod
+push $3
+lod
+mul
+sto
+push $4
+push $4
+lod
+push 1
+sub
+sto
+ujp L3
+L4:
+push $5
+lod
 mul
 add
 sto
 push $2
 lod
+push $9
 in
-push $3
 sto
 out
 hlt
