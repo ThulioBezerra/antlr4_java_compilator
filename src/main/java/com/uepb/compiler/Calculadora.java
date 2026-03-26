@@ -45,7 +45,6 @@ public class Calculadora extends ExprBaseVisitor<Void> {
         for (var expressao : ctx.expr()) {
             visit(expressao);
         }
-        code.append("out\n");
         code.append("hlt\n");
         return null;
     }

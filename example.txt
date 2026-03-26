@@ -1,4 +1,4 @@
-var x = 6;
+var x=5;
 const y = 10;
 // Estruturas condicionais
 if (x < y and x == 5 or true) {
@@ -12,7 +12,9 @@ x = x + 1;
 }
 // Exemplo de expressões aritméticas
 var z;
-z = x + y * 12 ^ 3 ^ 4;
-// Leitura de entrada
-var val;
-input(val);
+z = x * y ^ 2 ^ 3;
+print(z);
+print("Digite um valor para x");
+input(x);
+print("Novo valor de x é");
+print(x);

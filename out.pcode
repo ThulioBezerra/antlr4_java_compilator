@@ -1,5 +1,5 @@
 push $0
-push 6
+push 5
 sto
 push $1
 push 10
@@ -50,17 +50,16 @@ L2:
 push $2
 push $0
 lod
+push $3
 push $1
 lod
-push $3
-push 12
 sto
 push $4
 push $6
-push 3
+push 2
 sto
 push $7
-push 4
+push 3
 sto
 push $8
 push 1
@@ -116,12 +115,28 @@ L4:
 push $5
 lod
 mul
-add
 sto
 push $2
 lod
-push $9
+push $2
+lod
+out
+push "\n"
+out
+push "Digite um valor para x"
+out
+push "\n"
+out
+push $0
 in
 sto
+push "Novo valor de x é"
+out
+push "\n"
+out
+push $0
+lod
+out
+push "\n"
 out
 hlt
