@@ -2,19 +2,18 @@ package com.uepb.compiler;
 
 import com.uepb.ExprBaseVisitor;
 import com.uepb.ExprParser;
-import com.uepb.ExprParser.AtribuicaoContext;
-import com.uepb.ExprParser.BlocoContext;
+import com.uepb.ExprParser.CmdAtribuicaoContext;
+import com.uepb.ExprParser.CmdDeclaracaoContext;
+import com.uepb.ExprParser.CmdIfContext;
+import com.uepb.ExprParser.CmdImpressaoContext;
+import com.uepb.ExprParser.CmdWhileContext;
 import com.uepb.ExprParser.CondAndContext;
 import com.uepb.ExprParser.CondBooleanoContext;
 import com.uepb.ExprParser.CondOrContext;
 import com.uepb.ExprParser.CondParentesesContext;
 import com.uepb.ExprParser.CondRelacionalContext;
-import com.uepb.ExprParser.CondicaoContext;
 import com.uepb.ExprParser.DeclVariavelContext;
-import com.uepb.ExprParser.DeclaracaoContext;
-import com.uepb.ExprParser.ImpressaoContext;
 import com.uepb.ExprParser.InputContext;
-import com.uepb.ExprParser.LoopContext;
 import com.uepb.ExprParser.MulDivContext;
 import com.uepb.ExprParser.NumeroContext;
 import com.uepb.ExprParser.ParentesesContext;
@@ -42,16 +41,18 @@ public class Calculadora extends ExprBaseVisitor<Void> {
 
     @Override
     public Void visitProg(ProgContext ctx) {
+        scopes.createScope();
         for (var expressao : ctx.expr()) {
             visit(expressao);
         }
+        scopes.dropScope();
         code.append("hlt\n");
         return null;
     }
 
     @Override
     public Void visitParenteses(ParentesesContext ctx) {
-        visit(ctx.expression());
+        visit(ctx.expressao());
         return null;
     }
 
@@ -65,11 +66,11 @@ public class Calculadora extends ExprBaseVisitor<Void> {
         var endLoop = createLabel();
 
         code.append("push $").append(baseAddr).append("\n");
-        visit(ctx.expression(0));
+        visit(ctx.expressao(0));
         code.append("sto\n");
 
         code.append("push $").append(expAddr).append("\n");
-        visit(ctx.expression(1));
+        visit(ctx.expressao(1));
         code.append("sto\n");
 
         code.append("push $").append(resAddr).append("\n");
@@ -111,8 +112,8 @@ public class Calculadora extends ExprBaseVisitor<Void> {
 
     @Override
     public Void visitMulDiv(MulDivContext ctx) {
-        visit(ctx.expression(0));
-        visit(ctx.expression(1));
+        visit(ctx.expressao(0));
+        visit(ctx.expressao(1));
 
         if (ctx.op.getType() == ExprParser.DIV) {
             code.append("div\n");
@@ -124,10 +125,10 @@ public class Calculadora extends ExprBaseVisitor<Void> {
 
     @Override
     public Void visitSomaSub(SomaSubContext ctx) {
-        visit(ctx.expression(0));
-        visit(ctx.expression(1));
+        visit(ctx.expressao(0));
+        visit(ctx.expressao(1));
 
-        if (ctx.op.getType() == ExprParser.PLUS) {
+        if (ctx.op.getType() == ExprParser.SOM) {
             code.append("add\n");
         } else {
             code.append("sub\n");
@@ -137,9 +138,9 @@ public class Calculadora extends ExprBaseVisitor<Void> {
 
     @Override
     public Void visitNumero(NumeroContext ctx) {
-        var numeroStr = ctx.INT().getText();
+        var numeroStr = ctx.NUMBER().getText();
 
-        if (ctx.MINUS() != null) {
+        if (ctx.SUB() != null) {
             code.append("push -1\n");
             code.append("push ").append(numeroStr).append("\n");
             code.append("mul\n");
@@ -170,14 +171,14 @@ public class Calculadora extends ExprBaseVisitor<Void> {
 
     @Override
     public Void visitDeclVariavel(DeclVariavelContext ctx) {
-        for (var decl : ctx.declaration()) {
+        for (var decl : ctx.declaracao()) {
             visit(decl);
         }
         return null;
     }
 
     @Override
-    public Void visitDeclaracao(DeclaracaoContext ctx) {
+    public Void visitCmdDeclaracao(CmdDeclaracaoContext ctx) {
         var varName = ctx.ID().getText();
         boolean isConst = ctx.start.getText().equals("const");
         var tk = ctx.ID().getSymbol();
@@ -192,16 +193,16 @@ public class Calculadora extends ExprBaseVisitor<Void> {
 
         currentScope.insert(varName, address, isConst);
 
-        if (ctx.expression() != null) {
+        if (ctx.expressao() != null) {
             code.append("push $").append(address).append("\n");
-            visit(ctx.expression());
+            visit(ctx.expressao());
             code.append("sto\n");
         }
         return null;
     }
 
     @Override
-    public Void visitAtribuicao(AtribuicaoContext ctx) {
+    public Void visitCmdAtribuicao(CmdAtribuicaoContext ctx) {
         var nomeVar = ctx.ID().getText();
         var tk = ctx.ID().getSymbol();
         var declaracaoOpt = scopes.lookup(nomeVar);
@@ -221,7 +222,7 @@ public class Calculadora extends ExprBaseVisitor<Void> {
         var address = variavel.address();
 
         code.append("push $").append(address).append("\n");
-        visit(ctx.expression());
+        visit(ctx.expressao());
         code.append("sto\n");
 
         code.append("push $").append(address).append("\n");
@@ -233,9 +234,12 @@ public class Calculadora extends ExprBaseVisitor<Void> {
     @Override
     public Void visitInput(InputContext ctx) {
         var nomeVar = ctx.ID().getText();
+        var tk = ctx.ID().getSymbol();
         var declaracaoOpt = scopes.lookup(nomeVar);
-
         if (declaracaoOpt.isEmpty()) {
+            throw new RuntimeException(
+                    "Erro Semântico: A variavel '%s' usada no comando 'input' não foi declarada na linha %d e coluna %d"
+                            .formatted(nomeVar, tk.getLine(), tk.getCharPositionInLine()));
         }
 
         var address = declaracaoOpt.get().address();
@@ -248,12 +252,12 @@ public class Calculadora extends ExprBaseVisitor<Void> {
     }
 
     @Override
-    public Void visitImpressao(ImpressaoContext ctx) {
+    public Void visitCmdImpressao(CmdImpressaoContext ctx) {
         if (ctx.STRING() != null) {
             code.append("push ").append(ctx.STRING().getText()).append("\n");
             code.append("out\n");
         } else {
-            visit(ctx.expression());
+            visit(ctx.expressao());
             code.append("out\n");
         }
 
@@ -264,38 +268,54 @@ public class Calculadora extends ExprBaseVisitor<Void> {
     }
 
     @Override
-    public Void visitBloco(BlocoContext ctx) {
+    public Void visitCmdIf(CmdIfContext ctx) {
+        var labelFim = createLabel();
+        var labelElse = ctx.ELSE() != null ? createLabel() : labelFim;
+
+        visit(ctx.condicao());
+
+        code.append("fjp ").append(labelElse).append("\n");
+
+        scopes.createScope();
+        for (var expressao : ctx.expr()) {
+            if (ctx.ELSE() != null && expressao.start.getTokenIndex() > ctx.ELSE().getSymbol().getTokenIndex()) {
+                continue;
+            }
+            visit(expressao);
+        }
+        scopes.dropScope();
+
+        if (ctx.ELSE() != null) {
+            code.append("ujp ").append(labelFim).append("\n");
+            code.append(labelElse).append(":\n");
+
+            scopes.createScope();
+            for (var expressao : ctx.expr()) {
+                if (expressao.start.getTokenIndex() < ctx.ELSE().getSymbol().getTokenIndex()) {
+                    continue;
+                }
+                visit(expressao);
+            }
+            scopes.dropScope();
+        }
+        code.append(labelFim).append(":\n");
+        return null;
+    }
+
+    @Override
+    public Void visitCmdWhile(CmdWhileContext ctx) {
+        var start = createLabel();
+        var end = createLabel();
+
+        code.append(start).append(":\n");
+        visit(ctx.condicao());
+        code.append("fjp ").append(end).append("\n");
+
         scopes.createScope();
         for (var expressao : ctx.expr()) {
             visit(expressao);
         }
         scopes.dropScope();
-        return null;
-    }
-
-    @Override
-    public Void visitCondicao(CondicaoContext ctx) {
-        var fimIf = createLabel();
-
-        visit(ctx.condition());
-        code.append("fjp ").append(fimIf).append("\n");
-
-        visit(ctx.block());
-        code.append(fimIf).append(":\n");
-
-        return null;
-    }
-
-    @Override
-    public Void visitLoop(LoopContext ctx) {
-        var start = createLabel();
-        var end = createLabel();
-
-        code.append(start).append(":\n");
-        visit(ctx.condition());
-        code.append("fjp ").append(end).append("\n");
-
-        visit(ctx.block());
 
         code.append("ujp ").append(start).append("\n");
         code.append(end).append(":\n");
@@ -305,8 +325,8 @@ public class Calculadora extends ExprBaseVisitor<Void> {
 
     @Override
     public Void visitCondRelacional(CondRelacionalContext ctx) {
-        visit(ctx.expression(0));
-        visit(ctx.expression(1));
+        visit(ctx.expressao(0));
+        visit(ctx.expressao(1));
 
         int tipoOperador = ctx.op.start.getType();
 
@@ -323,16 +343,16 @@ public class Calculadora extends ExprBaseVisitor<Void> {
 
     @Override
     public Void visitCondAnd(CondAndContext ctx) {
-        visit(ctx.condition(0));
-        visit(ctx.condition(1));
+        visit(ctx.condicao(0));
+        visit(ctx.condicao(1));
         code.append("and\n");
         return null;
     }
 
     @Override
     public Void visitCondOr(CondOrContext ctx) {
-        visit(ctx.condition(0));
-        visit(ctx.condition(1));
+        visit(ctx.condicao(0));
+        visit(ctx.condicao(1));
         code.append("or\n");
         return null;
     }
@@ -349,7 +369,7 @@ public class Calculadora extends ExprBaseVisitor<Void> {
 
     @Override
     public Void visitCondParenteses(CondParentesesContext ctx) {
-        visit(ctx.condition());
+        visit(ctx.condicao());
         return null;
     }
 }

@@ -1,20 +1,20 @@
-var x=5;
+var x;
+print("Digite um valor para x:");
+input(x);
+print("O valor de x é:");
+print(x);
 const y = 10;
-// Estruturas condicionais
 if (x < y and x == 5 or true) {
 print("x é menor que y e x é igual a 5 ou verdadeiro");
 }
-// Estrutura de repetição
 while (x < 10) {
 print("O valor de x é:");
 print(x);
 x = x + 1;
 }
-// Exemplo de expressões aritméticas
-var z;
-z = x * y ^ 2 ^ 3;
-print(z);
-print("Digite um valor para x");
-input(x);
-print("Novo valor de x é");
+print("No fim do loop, o valor de x ficou:");
 print(x);
+
+var z;
+z = x * y ^ 2 ^ 3 ;
+print(z);

@@ -5,10 +5,10 @@ prog : expr* EOF ;
 expr
     : listaDeclaracao ';'
     | atribuicao ';'
+    | entrada ';'
     | condicional
     | loopWhile
     | impressao ';'
-    | entrada ';'
     ;
 
 listaDeclaracao
@@ -16,24 +16,23 @@ listaDeclaracao
     ;
 
 declaracao
-    : (VAR | LET | CONST) ID ('=' expressao)?                     #Declaracao
+    : (VAR | LET | CONST) ID ('=' expressao)?                     #CmdDeclaracao
     ;
 
 atribuicao
-    : ID '=' expressao                                            #Atribuicao
+    : ID '=' expressao                                            #CmdAtribuicao
     ;
 
 condicional
-    : IF LPAREN condicao RPAREN LBRACE expr* RBRACE               #Condicao
-    | ELSE LBRACE expr* RBRACE                                    #naoCondicao
+    : IF LPAREN condicao RPAREN LBRACE expr* RBRACE (ELSE LBRACE expr* RBRACE)?               #CmdIf
     ;
 
 loopWhile
-    : WHILE LPAREN condicao RPAREN LBRACE expr* RBRACE            #Loop
+    : WHILE LPAREN condicao RPAREN LBRACE expr* RBRACE            #CmdWhile
     ;
 
 impressao
-    : PRINT LPAREN (expressao | STRING) RPAREN                    #Impressao
+    : PRINT LPAREN (expressao | STRING) RPAREN                    #CmdImpressao
     ;
 
 entrada
@@ -65,6 +64,7 @@ VAR     : 'var' ;
 LET     : 'let' ;
 CONST   : 'const' ;
 IF      : 'if' ;
+ELSE    : 'else' ;
 WHILE   : 'while' ;
 PRINT   : 'print' ;
 INPUT   : 'input' ;
