@@ -1,11 +1,11 @@
-var x;
+var x =0;
 print("Digite um valor para x:");
 input(x);
 print("O valor de x é:");
 print(x);
 const y = 10;
 if (x < y and x == 5 or true) {
-print("x é menor que y e x é igual a 5 ou verdadeiro");
+print("x é menor que y e x é igual a 5");
 }
 while (x < 10) {
 print("O valor de x é:");
@@ -16,5 +16,6 @@ print("No fim do loop, o valor de x ficou:");
 print(x);
 
 var z;
-z = x * y ^ 2 ^ 3 ;
+z = x * y ^ 2 ^ 3;
+print(2^2^3);
 print(z);

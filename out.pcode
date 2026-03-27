@@ -30,7 +30,7 @@ and
 push true
 or
 fjp L0
-push "x é menor que y e x é igual a 5 ou verdadeiro"
+push "x é menor que y e x é igual a 5"
 out
 push "\n"
 out
@@ -140,6 +140,72 @@ mul
 sto
 push $2
 lod
+push $9
+push 2
+sto
+push $10
+push $12
+push 2
+sto
+push $13
+push 3
+sto
+push $14
+push 1
+sto
+L9:
+push $13
+lod
+push 0
+grt
+fjp L10
+push $14
+push $14
+lod
+push $12
+lod
+mul
+sto
+push $13
+push $13
+lod
+push 1
+sub
+sto
+ujp L9
+L10:
+push $14
+lod
+sto
+push $11
+push 1
+sto
+L7:
+push $10
+lod
+push 0
+grt
+fjp L8
+push $11
+push $11
+lod
+push $9
+lod
+mul
+sto
+push $10
+push $10
+lod
+push 1
+sub
+sto
+ujp L7
+L8:
+push $11
+lod
+out
+push "\n"
+out
 push $2
 lod
 out

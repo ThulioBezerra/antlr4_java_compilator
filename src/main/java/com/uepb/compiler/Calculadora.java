@@ -182,15 +182,16 @@ public class Calculadora extends ExprBaseVisitor<Void> {
         var varName = ctx.ID().getText();
         boolean isConst = ctx.start.getText().equals("const");
         var tk = ctx.ID().getSymbol();
-        var currentScope = scopes.getCurrentScope();
         var address = mapper.alloc();
+        var declaracaoExistente = scopes.lookup(varName);
 
-        if (currentScope.exists(varName)) {
+        if (declaracaoExistente.isPresent()) {
             throw new RuntimeException(
-                    "A variavel '%s' presente na linha %d e coluna %d ja foi declarada."
+                    "Erro Semântico: A variavel '%s' na linha %d e coluna %d já foi declarada anteriormente neste ou em outro escopo."
                             .formatted(varName, tk.getLine(), tk.getCharPositionInLine()));
         }
 
+        var currentScope = scopes.getCurrentScope();
         currentScope.insert(varName, address, isConst);
 
         if (ctx.expressao() != null) {
