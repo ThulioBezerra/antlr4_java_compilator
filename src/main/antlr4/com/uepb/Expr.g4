@@ -3,65 +3,61 @@ grammar Expr;
 prog : expr* EOF ;
 
 expr
-    : listDeclaration ';'
-    | assignment ';'
-    | ifExpr
-    | whileExpr
-    | printExpr ';'
-    | inputExpr ';'
-    | block
+    : listaDeclaracao ';'
+    | atribuicao ';'
+    | condicional
+    | loopWhile
+    | impressao ';'
+    | entrada ';'
     ;
 
-listDeclaration
-    : declaration (',' declaration)* #DeclVariavel
+listaDeclaracao
+    : declaracao (',' declaracao)*                               #DeclVariavel
     ;
 
-declaration
-    : (VAR | LET | CONST) ID ('=' expression)?                     #Declaracao
+declaracao
+    : (VAR | LET | CONST) ID ('=' expressao)?                     #Declaracao
     ;
 
-assignment
-    : ID '=' expression                                            #Atribuicao
+atribuicao
+    : ID '=' expressao                                            #Atribuicao
     ;
 
-ifExpr
-    : IF LPAREN condition RPAREN block                             #Condicao
+condicional
+    : IF LPAREN condicao RPAREN LBRACE expr* RBRACE               #Condicao
+    | ELSE LBRACE expr* RBRACE                                    #naoCondicao
     ;
 
-whileExpr
-    : WHILE LPAREN condition RPAREN block                          #Loop
+loopWhile
+    : WHILE LPAREN condicao RPAREN LBRACE expr* RBRACE            #Loop
     ;
 
-block
-    : LBRACE expr* RBRACE                                          #Bloco
+impressao
+    : PRINT LPAREN (expressao | STRING) RPAREN                    #Impressao
     ;
 
-printExpr
-    : PRINT LPAREN (expression | STRING) RPAREN                    #Impressao
-    ;
-
-inputExpr
+entrada
     : INPUT LPAREN ID RPAREN                                       #Input
     ;
 
-expression
-    : LPAREN expression RPAREN                                     #Parenteses
-    | <assoc=right> expression op=POW expression                   #Potencia
-    | expression op=(MUL | DIV) expression                         #MulDiv
-    | expression op=(PLUS | MINUS) expression                      #SomaSub 
-    | ID                                                           #UsoVariavel
-    | (PLUS | MINUS)? INT                                          #Numero
+expressao
+    : LPAREN expressao RPAREN                                    #Parenteses
+    | <assoc=right> expressao op=EXP expressao                   #Potencia
+    | expressao op=(MUL | DIV) expressao                         #MulDiv
+    | expressao op=(SOM | SUB) expressao                         #SomaSub 
+    | ID                                                         #UsoVariavel
+    | (SOM | SUB)? NUMBER                                        #Numero
     ;
 
-condition
-    : LPAREN condition RPAREN                                      #CondParenteses
-    | expression op=comparisonOperator expression                  #CondRelacional
-    | (TRUE | FALSE)                                               #CondBooleano
-    | condition op=AND condition                                   #CondAnd
-    | condition op=OR condition                                    #CondOr
+condicao
+    : LPAREN condicao RPAREN                                     #CondParenteses
+    | expressao op=operadoresCondicionais expressao              #CondRelacional
+    | (TRUE | FALSE)                                             #CondBooleano
+    | condicao op=AND condicao                                   #CondAnd
+    | condicao op=OR condicao                                    #CondOr
     ;
 
-comparisonOperator
+operadoresCondicionais
     : GT | GE | LT | LE | EQ | NEQ
     ;
 
@@ -82,11 +78,11 @@ RPAREN  : ')' ;
 LBRACE  : '{' ;
 RBRACE  : '}' ;
 
-PLUS    : '+' ;
-MINUS   : '-' ;
+SOM    : '+' ;
+SUB   : '-' ;
 MUL     : '*' ;
 DIV     : '/' ;
-POW     : '^' ;
+EXP     : '^' ;
 
 GT      : '>' ;
 GE      : '>=' ;
@@ -96,7 +92,7 @@ EQ      : '==' ;
 NEQ     : '!=' ;
 
 ID      : [a-zA-Z_][a-zA-Z0-9_]* ;
-INT     : [0-9]+ ('.' [0-9]+)? ;
+NUMBER     : [0-9]+ ('.' [0-9]+)? ;
 WS      : [ \t\r\n]+ -> skip ;
 COMMENT : '//' ~[\r\n]* -> skip ;
 STRING  : '"' .*? '"' ;
